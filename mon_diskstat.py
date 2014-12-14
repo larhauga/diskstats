@@ -7,7 +7,7 @@ from time import sleep
 
 # Tool for getting /proc/diskstats
 DISKSTATS_PATH = '/proc/diskstats'
-HEADERS = ['major_number', 'minor_number', 'device_name', 'read_completed_successfully',
+HEADERS = ['datetime', 'major_number', 'minor_number', 'device_name', 'read_completed_successfully',
         'reads_merged', 'sectors_read', 'time_spent_reading(ms)', 'writes_completed',
         'writes_merged', 'sectors_written', 'time_spent_writing_(ms)', 'IO_currently_in_progress',
         'time_spent_doing_IO_(ms)', 'weighted_time_spent_doing_IO']
@@ -20,7 +20,7 @@ def read_diskstats():
     with open(DISKSTATS_PATH, 'r') as f:
         for line in f.readlines():
             # check if line is disk
-            devs.append(dict(zip(HEADERS, re.split('\s+', line.strip()))))
+            devs.append(dict(zip(HEADERS[1:], re.split('\s+', line.strip()))))
     lastread_timestamp = datetime.now()
 
     return devs
@@ -48,18 +48,16 @@ def write_diskstats(data, device=None):
                 data = d
 
                 for dev in data:
-                    tmp = [dev[h] for h in HEADERS]
+                    tmp = [dev[h] for h in HEADERS[1:]]
                     tmp.insert(0, lastread_timestamp.isoformat())
                     csv_data.append(tmp)
-
-
 
         else:
             data = find_device(data, device[0])
             filename = "mon_{}".format(device[0].strip())
             if not os.path.isfile(filename):
                 csv_data = [HEADERS]
-            tmp = [data[h] for h in HEADERS]
+            tmp = [data[h] for h in HEADERS[1:]]
             tmp.insert(0, lastread_timestamp.isoformat())
             csv_data.append(tmp)
 
@@ -68,7 +66,7 @@ def write_diskstats(data, device=None):
         if not os.path.isfile(filename):
             csv_data = [HEADERS]
         for dev in data:
-            tmp = [dev[h] for h in HEADERS]
+            tmp = [dev[h] for h in HEADERS[1:]]
             tmp.insert(0, lastread_timestamp.isoformat())
             csv_data.append(tmp)
 
@@ -91,7 +89,7 @@ def main():
     try:
         if args.loop:
             while True:
-                print "Running..."
+                print "Gathering data for {}".format(args.device)
                 data = gather_and_write(args.device)
                 sleep(args.loop)
         else:
