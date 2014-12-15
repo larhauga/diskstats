@@ -4,8 +4,8 @@ The tool has is sole purpose of parsing /proc/diskstats and store it as csv file
 
 ## Usage
 ```
-python mon_diskstat.py -h
-usage: mon_diskstat.py [-h] [-l sleep] [-d name [name ...]]
+python diskstats.py -h
+usage: diskstats.py [-h] [-l sleep] [-d name [name ...]]
 
 Parser tool for /proc/diskstats
 

@@ -28,13 +28,13 @@ def read_diskstats():
 def find_device(data, device):
     return (item for item in data if item['device_name'] == device).next()
 
-def write_diskstats(data, device=None):
+def write_diskstats(data, device=None, path=""):
     global lastread_timestamp
     csv_data = []
 
     if device:
         if len(device) > 1:
-            filename = "mon_diskstats_{}".format("_".join(device))
+            filename = "{}mon_diskstats_{}".format(path, "_".join(device))
             if not os.path.isfile(filename):
                 csv_data = [HEADERS]
             d = []
@@ -54,7 +54,7 @@ def write_diskstats(data, device=None):
 
         else:
             data = find_device(data, device[0])
-            filename = "mon_{}".format(device[0].strip())
+            filename = "{}mon_{}".format(path, device[0].strip())
             if not os.path.isfile(filename):
                 csv_data = [HEADERS]
             tmp = [data[h] for h in HEADERS[1:]]
@@ -62,7 +62,7 @@ def write_diskstats(data, device=None):
             csv_data.append(tmp)
 
     else:
-        filename = "mon_diskstats"
+        filename = "{}mon_diskstats".format(path)
         if not os.path.isfile(filename):
             csv_data = [HEADERS]
         for dev in data:
@@ -84,6 +84,7 @@ def main():
     parser.add_argument('-l', '--loop', type=int, metavar='sleep',
             help='Runs the program in a loop. Takes the looptime as option.')
     parser.add_argument('-d', '--device', metavar='name', nargs='+', default=None, help='Names, like sda, sda1...')
+    parser.add_argument('-o', '--outdir', metavar='outdir', default=None, help='Path to store files in. End with /')
     args = parser.parse_args()
 
     try:
